@@ -1,21 +1,68 @@
-// create web server with express
-// http://expressjs.com/
+// Create web server
+// Create a new comment
+// Get all comments
+// Get a single comment
+// Update a comment
+// Delete a comment
+
 var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+var router = express.Router();
+var Comment = require('../models/comment');
 
-// create a route
-app.post('/comments', function(req, res) {
-  // get the comments from the request
-  var comments = req.body.comments;
-  // send the comments back to the client
-  res.send(comments);
+// Create a new comment
+router.post('/', (req, res) => {
+  var comment = new Comment(req.body);
+  comment.save((err, comment) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(201).send(comment);
+    }
+  });
 });
 
-// start the server
-var server = app.listen(3000, function() {
-  console.log('Listening on port 3000');
+// Get all comments
+router.get('/', (req, res) => {
+  Comment.find((err, comments) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(200).send(comments);
+    }
+  });
 });
 
+// Get a single comment
+router.get('/:id', (req, res) => {
+  Comment.findById(req.params.id, (err, comment) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(200).send(comment);
+    }
+  });
+});
+
+// Update a comment
+router.put('/:id', (req, res) => {
+  Comment.findByIdAndUpdate(req.params.id, req.body, (err, comment) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(200).send(comment);
+    }
+  });
+});
+
+// Delete a comment
+router.delete('/:id', (req, res) => {
+  Comment.findByIdAndRemove(req.params.id, (err, comment) => {
+    if (err) {
+      res.status(400).send(err);
+    } else {
+      res.status(204).send();
+    }
+  });
+});
+
+module.exports = router;
